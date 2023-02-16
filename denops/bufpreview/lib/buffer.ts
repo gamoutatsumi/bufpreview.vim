@@ -1,4 +1,4 @@
-import { anonymous, autocmd, Denops, EventEmitter } from "./deps.ts";
+import { autocmd, Denops, EventEmitter, lambda } from "./deps.ts";
 
 type BufferEvents = {
   textChanged(buffer: Buffer): void;
@@ -68,7 +68,7 @@ export default class Buffer {
     this._cursorLine = (await this._denops.call("getcurpos") as number[])[1];
 
     // textchanged callback
-    this._textChanged = anonymous.add(this._denops, async () => {
+    this._textChanged = lambda.register(this._denops, async () => {
       this._buf = await this._denops.call(
         "getbufline",
         this._bufnr,
@@ -78,12 +78,12 @@ export default class Buffer {
       this.events.emit("textChanged", this);
     })[0];
     // cursorMoved callback
-    this._cursorMoved = anonymous.add(this._denops, async () => {
+    this._cursorMoved = lambda.register(this._denops, async () => {
       this._cursorLine = (await this._denops.call("getcurpos") as number[])[1];
       this.events.emit("cursorMoved", this);
     })[0];
     // bufLeave callback
-    this._bufDelete = anonymous.add(this._denops, () => {
+    this._bufDelete = lambda.register(this._denops, () => {
       this.events.emit("bufDelete", this);
     })[0];
 
@@ -127,9 +127,9 @@ export default class Buffer {
       },
     );
     // remove anonymous function
-    anonymous.remove(this._denops, this._textChanged);
-    anonymous.remove(this._denops, this._cursorMoved);
-    anonymous.remove(this._denops, this._bufDelete);
+    lambda.unregister(this._denops, this._textChanged);
+    lambda.unregister(this._denops, this._cursorMoved);
+    lambda.unregister(this._denops, this._bufDelete);
   }
 
   // getter functions

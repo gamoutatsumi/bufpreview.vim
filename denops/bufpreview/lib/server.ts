@@ -1,5 +1,4 @@
 import { Denops } from "./deps.ts";
-import { v4 } from "./deps.ts";
 import { serveDir } from "./deps.ts";
 
 import Buffer from "./buffer.ts";
@@ -90,7 +89,10 @@ export default class Server {
               }),
             }),
           );
-        } else if (request.method === "GET" && new URL(request.url).pathname === "/markdown.bundle.js") {
+        } else if (
+          request.method === "GET" &&
+          new URL(request.url).pathname === "/markdown.bundle.js"
+        ) {
           respondWith(
             new Response(this._bundled_markdown_js, {
               status: 200,
@@ -122,7 +124,7 @@ export default class Server {
   // サーバとの通信
   private _wsHandle(request: Request): Response {
     const { socket, response } = Deno.upgradeWebSocket(request);
-    const uid = v4.generate();
+    const uid = crypto.randomUUID();
 
     this._sockets.set(uid, socket);
     socket.onopen = () => {
@@ -156,11 +158,11 @@ export default class Server {
     this._onClose();
   }
 
-  get host(): string {
+  get host(): string | number {
     if (this._listener == undefined) {
       return -1;
     }
-    return this._listener.addr.hostname as string;
+    return (this._listener.addr as Deno.NetAddr).hostname;
   }
 
   get port(): number {

@@ -1,4 +1,4 @@
-import * as esbuild from 'npm:esbuild@0.15.13'
+import * as esbuild from 'npm:esbuild@0.17.8'
 
 esbuild.build({
   entryPoints: ['denops/bufpreview/lib/filetype/markdown/client/markdown.js'],
